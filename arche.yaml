@@ -1,0 +1,16 @@
+
+name: test
+version: 1.0.0
+kind: maven
+
+files:
+  - dir::main:
+      - dir::src:
+          - javaPackage::com.thebeastshop.product.main:
+               -javaClassSource::Runner:
+                  copyNE: ~/temp/Runner.java
+  - xml::pom:
+      copyNE: ~/tmp/parent/pom.xml
+      change:
+        version: 
+
