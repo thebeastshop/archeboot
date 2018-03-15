@@ -8,7 +8,9 @@ import (
 
 func main() {
 	var proj data.Project
-	_, err := proj.Read()
+	config := data.NewConfig()
+	fmt.Println("Config Path:", config.ConfigPath)
+	_, err := proj.Read(config)
 	if err != nil {
 		return
 	}
