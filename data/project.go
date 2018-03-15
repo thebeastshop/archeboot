@@ -6,43 +6,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 )
-
-func getCurrentDirectory() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		utils.LogError(err)
-	}
-	return strings.Replace(dir, "\\", "/", -1)
-}
-
-func mkdir(path string) error {
-	exists, _ := pathExists(path)
-	if exists {
-		return nil
-	}
-	err := os.MkdirAll(path, 0777)
-	if err != nil {
-		utils.LogError(err)
-	} else {
-		utils.Println("Create Floder " + path)
-	}
-	return err
-}
-
-func pathExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
 
 type Executable interface {
 	Exec() error
@@ -60,15 +24,17 @@ type Floder struct {
 }
 
 type Project struct {
-	Name    string `yaml:"name"`
-	Version string `yaml:"version"`
-	Kind    string `yaml:"kind"`
-	AbsPath string
-	Floder  *[]Floder `yaml:"dir"`
+	Name      string             `yaml:"name"`
+	Version   string             `yaml:"version"`
+	Kind      string             `yaml:"kind"`
+	Variables *map[string]string `yaml:"variables"`
+	Files     *[]interface{}     `yaml:"files"`
+	AbsPath   string
+	Floder    *[]Floder `yaml:"dir"`
 }
 
-func (p *Project) Read() (*Project, error) {
-	yamlFile, err := ioutil.ReadFile("arche.yaml")
+func (p *Project) Read(config *Config) (*Project, error) {
+	yamlFile, err := ioutil.ReadFile(config.Info.DefaultBootFileName)
 	if err != nil {
 		utils.LogError(err)
 	}
@@ -114,7 +80,7 @@ func initFloderList(floders *[]Floder, parent *Floder, p *Project) {
 func (p *Project) Init() {
 	fmt.Println("Init Project")
 	floders := p.Floder
-	p.AbsPath = getCurrentDirectory()
+	p.AbsPath = utils.GetCurrentDirectory()
 	initFloderList(floders, nil, p)
 }
 
@@ -130,11 +96,13 @@ func (p *Project) Exec() error {
 	fmt.Println("Project Name:", p.Name)
 	fmt.Println("Project Version:", p.Version)
 	fmt.Println("Current Path:", p.GetAbsPath())
+	fmt.Println("Variables:", p.Variables)
+	fmt.Println("Files:", p.Files)
 	return execFloder(p.Floder)
 }
 
 func (f *Floder) Exec() error {
-	err := mkdir(f.GetAbsPath())
+	err := utils.Mkdir(f.GetAbsPath())
 	if err != nil {
 		return err
 	}
