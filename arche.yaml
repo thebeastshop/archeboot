@@ -1,16 +1,26 @@
+name: git.thebeastshop.com/archeboot/beast-dubbo-quickstart
+arguments:
+  - apiVersion
+  - rootPackage
 
-name: test
-version: 1.0.0
-kind: maven
 
-files:
-  - dir::main:
-      - dir::src:
-          - javaPackage::com.thebeastshop.product.main:
-               -javaClassSource::Runner:
-                  copyNE: ~/temp/Runner.java
-  - xml::pom:
-      copyNE: ~/tmp/parent/pom.xml
+resources:
+  - res
+  - LICENSE
+
+create:
+  - dir:src:
+      - dir:main:
+        - dir:java:
+          - javaPackage:${rootPackage}.main:
+               - javaFile:Runner:
+                  copyFrom: ${resources.res}/Runner.java
+  - xml:pom:
+      copyFrom: ${resources.res}/pom.xml
       change:
-        version: 
+        version: ${arguments.apiVersion}
+  - copy:${resources.LICENSE}
 
+exec:
+  - cd src/main
+  - mkdir 
